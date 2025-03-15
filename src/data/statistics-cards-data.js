@@ -39,17 +39,6 @@ export const statisticsCardsData = [
       label: "than yesterday",
     },
   },
-  {
-    color: "gray",
-    icon: ChartBarIcon,
-    title: "Sales",
-    value: "$103,430",
-    footer: {
-      color: "text-green-500",
-      value: "+5%",
-      label: "than yesterday",
-    },
-  },
 ];
 
 export default statisticsCardsData;
