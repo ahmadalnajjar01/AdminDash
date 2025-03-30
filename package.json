@@ -9,8 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@heroicons/react": "2.0.18",
-    "@material-tailwind/react": "2.1.4",
+    "@heroicons/react": "^2.0.18",
+    "@material-tailwind/react": "^2.1.4",
     "apexcharts": "3.44.0",
     "axios": "^1.8.4",
     "lucide-react": "^0.485.0",

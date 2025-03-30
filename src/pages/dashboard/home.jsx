@@ -15,13 +15,16 @@ import AddProducts from "./addProducts";
 export function Home() {
   const [userCount, setUserCount] = useState(null);
   const [productCount, setProductCount] = useState(null);
+  const [orderCount, setOrderCount] = useState(null);
   const [loading, setLoading] = useState({
     users: true,
     products: true,
+    orders: true,
   });
   const [error, setError] = useState({
     users: null,
     products: null,
+    orders: null,
   });
 
   useEffect(() => {
@@ -59,8 +62,26 @@ export function Home() {
       }
     };
 
+    const fetchOrderCount = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/orders/count" // Make sure this matches your backend route
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch order count");
+        }
+        const data = await response.json();
+        setOrderCount(data.count);
+      } catch (err) {
+        setError((prev) => ({ ...prev, orders: err.message }));
+      } finally {
+        setLoading((prev) => ({ ...prev, orders: false }));
+      }
+    };
+
     fetchUserCount();
     fetchProductCount();
+    fetchOrderCount();
   }, []);
 
   // Stats data for the cards
@@ -91,9 +112,15 @@ export function Home() {
     },
     {
       title: "Total Orders",
-      value: "2,491", // You can implement this similarly later
+      value: loading.orders
+        ? "Loading..."
+        : error.orders
+        ? "Error"
+        : orderCount?.toLocaleString() || "0",
       icon: ShoppingBagIcon,
       color: "bg-green-500",
+      loading: loading.orders,
+      error: error.orders,
     },
   ];
 

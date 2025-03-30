@@ -1,33 +1,67 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  Typography,
+  Button,
+  Tooltip,
+  IconButton,
+  Avatar,
+  Spinner,
+  Alert,
+  Switch,
+  Dialog,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
+  Input,
+  Textarea,
+  Select,
+  Option,
+} from "@material-tailwind/react";
+import {
+  PencilIcon,
+  TrashIcon,
+  EyeIcon,
+  CheckIcon,
+  XMarkIcon,
+  ArrowUpTrayIcon,
+} from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [editingProduct, setEditingProduct] = useState(null);
   const [editFormData, setEditFormData] = useState({
     name: "",
     description: "",
     price: "",
     stock: "",
-    status: "active",
+    status: true,
     image: null,
   });
   const [imagePreview, setImagePreview] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   // Fetch all products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get(
+        const response = await fetch(
           "http://localhost:5000/api/getAllProducts"
         );
-        setProducts(response.data.products);
+        const data = await response.json();
+        if (!response.ok)
+          throw new Error(data.message || "Failed to fetch products");
+        setProducts(data.products);
       } catch (error) {
-        toast.error("Failed to fetch products");
-        console.error("Error fetching products:", error);
+        setError(error.message);
+        toast.error(error.message);
       } finally {
         setLoading(false);
       }
@@ -39,14 +73,18 @@ const Products = () => {
   // Handle delete product
   const handleDelete = async (productId) => {
     try {
-      await axios.delete(
-        `http://localhost:5000/api/products-delete/${productId}`
+      const response = await fetch(
+        `http://localhost:5000/api/products-delete/${productId}`,
+        {
+          method: "DELETE",
+        }
       );
+      if (!response.ok) throw new Error("Failed to delete product");
+
       setProducts(products.filter((product) => product.id !== productId));
       toast.success("Product deleted successfully");
     } catch (error) {
-      toast.error("Failed to delete product");
-      console.error("Error deleting product:", error);
+      toast.error(error.message);
     }
   };
 
@@ -58,7 +96,7 @@ const Products = () => {
       description: product.description,
       price: product.price,
       stock: product.stock,
-      status: product.status,
+      status: product.status === "active",
       image: product.image,
     });
     setImagePreview(product.image);
@@ -73,7 +111,15 @@ const Products = () => {
     });
   };
 
-  // Handle main image change
+  // Handle status toggle
+  const handleStatusToggle = () => {
+    setEditFormData({
+      ...editFormData,
+      status: !editFormData.status,
+    });
+  };
+
+  // Handle image change
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -89,39 +135,37 @@ const Products = () => {
   const handleEditSubmit = async (productId) => {
     try {
       const formData = new FormData();
-
-      // Append text fields
       formData.append("name", editFormData.name);
       formData.append("description", editFormData.description);
       formData.append("price", editFormData.price);
       formData.append("stock", editFormData.stock);
-      formData.append("status", editFormData.status);
+      formData.append("status", editFormData.status ? "active" : "inactive");
 
-      // Append main image if changed
       if (editFormData.image instanceof File) {
         formData.append("image", editFormData.image);
       }
 
-      const response = await axios.put(
+      const response = await fetch(
         `http://localhost:5000/api/update-products/${productId}`,
-        formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          method: "PUT",
+          body: formData,
         }
       );
 
+      const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.message || "Failed to update product");
+
       setProducts(
         products.map((product) =>
-          product.id === productId ? response.data.product : product
+          product.id === productId ? data.product : product
         )
       );
       setEditingProduct(null);
       toast.success("Product updated successfully");
     } catch (error) {
-      toast.error("Failed to update product");
-      console.error("Error updating product:", error);
+      toast.error(error.message);
     }
   };
 
@@ -130,204 +174,403 @@ const Products = () => {
     setEditingProduct(null);
   };
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">
-        Products Management
-      </h1>
+  // View product details
+  const viewProductDetails = (product) => {
+    setSelectedProduct(product);
+    setOpenDialog(true);
+  };
 
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      ) : (
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Image
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Description
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Price
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Stock
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {products.length > 0 ? (
-                  products.map((product) => (
-                    <tr key={product.id} className="hover:bg-gray-50">
-                      {editingProduct === product.id ? (
-                        <>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Product Image
-                              </label>
-                              <input
-                                type="file"
-                                onChange={handleImageChange}
-                                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                              />
-                              {imagePreview && (
-                                <div className="mt-2">
-                                  <img
-                                    src={
-                                      imagePreview.startsWith("blob:")
-                                        ? imagePreview
-                                        : `http://localhost:5000${imagePreview}`
-                                    }
-                                    alt="Preview"
-                                    className="h-20 w-20 object-cover rounded"
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <input
-                              type="text"
-                              name="name"
-                              value={editFormData.name}
-                              onChange={handleEditFormChange}
-                              className="w-full px-2 py-1 border rounded"
-                            />
-                          </td>
-                          <td className="px-6 py-4">
-                            <input
-                              type="text"
-                              name="description"
-                              value={editFormData.description}
-                              onChange={handleEditFormChange}
-                              className="w-full px-2 py-1 border rounded"
-                            />
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <input
-                              type="number"
-                              name="price"
-                              value={editFormData.price}
-                              onChange={handleEditFormChange}
-                              className="w-full px-2 py-1 border rounded"
-                            />
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <input
-                              type="number"
-                              name="stock"
-                              value={editFormData.stock}
-                              onChange={handleEditFormChange}
-                              className="w-full px-2 py-1 border rounded"
-                            />
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <select
-                              name="status"
-                              value={editFormData.status}
-                              onChange={handleEditFormChange}
-                              className="w-full px-2 py-1 border rounded"
-                            >
-                              <option value="active">Active</option>
-                              <option value="inactive">Inactive</option>
-                            </select>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <button
-                              onClick={() => handleEditSubmit(product.id)}
-                              className="mr-2 px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-                            >
-                              Save
-                            </button>
-                            <button
-                              onClick={handleCancelEdit}
-                              className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
-                            >
-                              Cancel
-                            </button>
-                          </td>
-                        </>
-                      ) : (
-                        <>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {product.image && (
-                              <img
-                                src={`http://localhost:5000/${product.image}`}
-                                alt={product.name}
-                                className="h-20 w-20 object-cover rounded"
-                              />
-                            )}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                            {product.name}
-                          </td>
-                          <td className="px-6 py-4 text-gray-500">
-                            {product.description}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-gray-500">
-                            ${product.price}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-gray-500">
-                            {product.stock}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span
-                              className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                product.status === "active"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-red-100 text-red-800"
-                              }`}
-                            >
-                              {product.status}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button
-                              onClick={() => handleEditClick(product)}
-                              className="mr-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDelete(product.id)}
-                              className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                            >
-                              Delete
-                            </button>
-                          </td>
-                        </>
-                      )}
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan="7"
-                      className="px-6 py-4 text-center text-gray-500"
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Spinner className="h-12 w-12" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert
+        icon={<ExclamationTriangleIcon className="h-6 w-6" />}
+        color="red"
+        className="my-4"
+      >
+        {error}
+      </Alert>
+    );
+  }
+
+  return (
+    <div className="p-4">
+      <Card className="mb-8">
+        <CardHeader variant="gradient" color="blue" className="mb-8 p-6">
+          <Typography variant="h6" color="white">
+            Products Management
+          </Typography>
+        </CardHeader>
+        <CardBody className="overflow-x-auto px-0 pt-0 pb-2">
+          <table className="w-full min-w-[640px] table-auto">
+            <thead>
+              <tr>
+                {[
+                  "Product",
+                  "Description",
+                  "Price",
+                  "Stock",
+                  "Status",
+                  "Actions",
+                ].map((el) => (
+                  <th
+                    key={el}
+                    className="border-b border-blue-gray-50 py-3 px-5 text-left"
+                  >
+                    <Typography
+                      variant="small"
+                      className="text-[11px] font-bold uppercase text-blue-gray-400"
                     >
-                      No products found
+                      {el}
+                    </Typography>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((product) => {
+                const className = `py-3 px-5 border-b border-blue-gray-50`;
+
+                return (
+                  <tr key={product.id}>
+                    <td className={className}>
+                      <div className="flex items-center gap-3">
+                        <Avatar
+                          src={`http://localhost:5000/${product.image}`}
+                          alt={product.name}
+                          size="sm"
+                          variant="rounded"
+                        />
+                        <div>
+                          <Typography variant="small" className="font-medium">
+                            {product.name}
+                          </Typography>
+                          <Typography
+                            variant="small"
+                            className="text-blue-gray-500"
+                          >
+                            ID: #{product.id}
+                          </Typography>
+                        </div>
+                      </div>
+                    </td>
+                    <td className={className}>
+                      <Typography
+                        variant="small"
+                        className="font-medium text-blue-gray-600"
+                      >
+                        {product.description.substring(0, 50)}...
+                      </Typography>
+                    </td>
+                    <td className={className}>
+                      <Typography
+                        variant="small"
+                        className="font-medium text-blue-gray-600"
+                      >
+                        ${product.price}
+                      </Typography>
+                    </td>
+                    <td className={className}>
+                      <Typography
+                        variant="small"
+                        className="font-medium text-blue-gray-600"
+                      >
+                        {product.stock}
+                      </Typography>
+                    </td>
+                    <td className={className}>
+                      {editingProduct === product.id ? (
+                        <Switch
+                          color="green"
+                          checked={editFormData.status}
+                          onChange={handleStatusToggle}
+                          label={
+                            <div>
+                              <Typography
+                                color="blue-gray"
+                                className="font-medium"
+                              >
+                                {editFormData.status ? "Active" : "Inactive"}
+                              </Typography>
+                            </div>
+                          }
+                        />
+                      ) : (
+                        <Switch
+                          color="green"
+                          checked={product.status === "active"}
+                          readOnly
+                          label={
+                            <div>
+                              <Typography
+                                color="blue-gray"
+                                className="font-medium"
+                              >
+                                {product.status === "active"
+                                  ? "Active"
+                                  : "Inactive"}
+                              </Typography>
+                            </div>
+                          }
+                        />
+                      )}
+                    </td>
+                    <td className={className}>
+                      <div className="flex gap-2">
+                        <Tooltip content="View Details">
+                          <IconButton
+                            variant="text"
+                            color="blue-gray"
+                            onClick={() => viewProductDetails(product)}
+                          >
+                            <EyeIcon className="h-5 w-5" />
+                          </IconButton>
+                        </Tooltip>
+                        {editingProduct === product.id ? (
+                          <>
+                            <Tooltip content="Save">
+                              <IconButton
+                                variant="text"
+                                color="green"
+                                onClick={() => handleEditSubmit(product.id)}
+                              >
+                                <CheckIcon className="h-5 w-5" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip content="Cancel">
+                              <IconButton
+                                variant="text"
+                                color="red"
+                                onClick={handleCancelEdit}
+                              >
+                                <XMarkIcon className="h-5 w-5" />
+                              </IconButton>
+                            </Tooltip>
+                          </>
+                        ) : (
+                          <>
+                            <Tooltip content="Edit">
+                              <IconButton
+                                variant="text"
+                                color="blue-gray"
+                                onClick={() => handleEditClick(product)}
+                              >
+                                <PencilIcon className="h-5 w-5" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip content="Delete">
+                              <IconButton
+                                variant="text"
+                                color="red"
+                                onClick={() => handleDelete(product.id)}
+                              >
+                                <TrashIcon className="h-5 w-5" />
+                              </IconButton>
+                            </Tooltip>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                );
+              })}
+            </tbody>
+          </table>
+        </CardBody>
+      </Card>
+
+      {/* Product Details Dialog */}
+      <Dialog open={openDialog} handler={() => setOpenDialog(false)} size="lg">
+        <DialogHeader>Product Details #{selectedProduct?.id}</DialogHeader>
+        <DialogBody divider>
+          {selectedProduct && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <div className="mb-4">
+                  <Avatar
+                    src={`http://localhost:5000/${selectedProduct.image}`}
+                    alt={selectedProduct.name}
+                    size="xxl"
+                    variant="rounded"
+                  />
+                </div>
+                <Typography variant="h6" color="blue-gray" className="mb-2">
+                  {selectedProduct.name}
+                </Typography>
+                <Typography className="mb-4">
+                  {selectedProduct.description}
+                </Typography>
+              </div>
+              <div>
+                <div className="space-y-4">
+                  <div>
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-bold"
+                    >
+                      Price
+                    </Typography>
+                    <Typography>${selectedProduct.price}</Typography>
+                  </div>
+                  <div>
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-bold"
+                    >
+                      Stock
+                    </Typography>
+                    <Typography>{selectedProduct.stock}</Typography>
+                  </div>
+                  <div>
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-bold"
+                    >
+                      Status
+                    </Typography>
+                    <Switch
+                      color="green"
+                      checked={selectedProduct.status === "active"}
+                      readOnly
+                      label={
+                        <Typography color="blue-gray" className="font-medium">
+                          {selectedProduct.status === "active"
+                            ? "Active"
+                            : "Inactive"}
+                        </Typography>
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogBody>
+        <DialogFooter>
+          <Button
+            variant="text"
+            color="red"
+            onClick={() => setOpenDialog(false)}
+            className="mr-1"
+          >
+            Close
+          </Button>
+        </DialogFooter>
+      </Dialog>
+
+      {/* Edit Form Dialog */}
+      {editingProduct && (
+        <Dialog open={!!editingProduct} handler={handleCancelEdit} size="xl">
+          <DialogHeader>Edit Product #{editingProduct}</DialogHeader>
+          <DialogBody divider>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <div className="mb-4">
+                  <Typography variant="small" className="mb-2">
+                    Product Image
+                  </Typography>
+                  <div className="flex items-center gap-4">
+                    <Avatar
+                      src={
+                        imagePreview?.startsWith("blob:")
+                          ? imagePreview
+                          : `http://localhost:5000/${imagePreview}`
+                      }
+                      alt="Product"
+                      size="xxl"
+                      variant="rounded"
+                    />
+                    <label className="cursor-pointer">
+                      <Button
+                        variant="outlined"
+                        color="blue-gray"
+                        className="flex items-center gap-2"
+                      >
+                        <ArrowUpTrayIcon className="h-4 w-4" />
+                        Upload New Image
+                      </Button>
+                      <input
+                        type="file"
+                        onChange={handleImageChange}
+                        className="hidden"
+                        accept="image/*"
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div className="space-y-4">
+                  <Input
+                    label="Product Name"
+                    name="name"
+                    value={editFormData.name}
+                    onChange={handleEditFormChange}
+                  />
+                  <Textarea
+                    label="Description"
+                    name="description"
+                    value={editFormData.description}
+                    onChange={handleEditFormChange}
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      type="number"
+                      label="Price"
+                      name="price"
+                      value={editFormData.price}
+                      onChange={handleEditFormChange}
+                    />
+                    <Input
+                      type="number"
+                      label="Stock"
+                      name="stock"
+                      value={editFormData.stock}
+                      onChange={handleEditFormChange}
+                    />
+                  </div>
+                  <Switch
+                    color="green"
+                    checked={editFormData.status}
+                    onChange={handleStatusToggle}
+                    label={
+                      <Typography color="blue-gray" className="font-medium">
+                        {editFormData.status ? "Active" : "Inactive"}
+                      </Typography>
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <Button
+              variant="text"
+              color="red"
+              onClick={handleCancelEdit}
+              className="mr-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="gradient"
+              color="green"
+              onClick={() => handleEditSubmit(editingProduct)}
+            >
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </Dialog>
       )}
     </div>
   );
