@@ -6,6 +6,7 @@ import {
 import { Home, Tables } from "@/pages/dashboard";
 import { SignIn } from "@/pages/auth";
 import User from "./pages/dashboard/user";
+import Products from "./pages/dashboard/products";
 
 const icon = {
   className: "w-5 h-5 text-inherit",
@@ -26,6 +27,12 @@ export const routes = [
         name: "users",
         path: "/users",
         element: <User />,
+      },
+      {
+        icon: <ServerStackIcon {...icon} />,
+        name: "products",
+        path: "/products",
+        element: <Products />,
       },
       {
         icon: <TableCellsIcon {...icon} />,
