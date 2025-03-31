@@ -9,6 +9,7 @@ import User1 from "./pages/dashboard/user";
 import Products from "./pages/dashboard/products";
 import Order from "./pages/dashboard/order";
 import Message from "./pages/dashboard/message";
+import CommentAndReport from "./pages/dashboard/CommentAndReport";
 import { Package, MessageSquare, User } from "lucide-react";
 
 const icon = {
@@ -48,6 +49,12 @@ export const routes = [
         name: "message",
         path: "/message",
         element: <Message />,
+      },
+      {
+        icon: <MessageSquare {...icon} />,
+        name: "Comment & Report",
+        path: "/comment-report",
+        element: <CommentAndReport />,
       },
     ],
   },

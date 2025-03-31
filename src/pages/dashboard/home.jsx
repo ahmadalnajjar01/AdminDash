@@ -11,6 +11,7 @@ import {
   ShoppingBagIcon,
 } from "@heroicons/react/24/outline";
 import AddProducts from "./addProducts";
+import ADS from "./ADS";
 
 export function Home() {
   const [userCount, setUserCount] = useState(null);
@@ -84,7 +85,6 @@ export function Home() {
     fetchOrderCount();
   }, []);
 
-  // Stats data for the cards
   const statsData = [
     {
       title: "Total Users",
@@ -183,7 +183,8 @@ export function Home() {
             )
           )}
         </div>
-      </div>
+      </div>{" "}
+      <ADS />
       <AddProducts />
     </>
   );
