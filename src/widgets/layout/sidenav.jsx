@@ -1,22 +1,43 @@
 import PropTypes from "prop-types";
-import { Link, NavLink } from "react-router-dom";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
-  Avatar,
-  Button,
-  IconButton,
-  Typography,
-} from "@material-tailwind/react";
+  XMarkIcon,
+  ArrowRightOnRectangleIcon,
+} from "@heroicons/react/24/outline";
+import { Button, IconButton, Typography } from "@material-tailwind/react";
 import { useMaterialTailwindController, setOpenSidenav } from "@/context";
+import { useEffect } from "react";
 
 export function Sidenav({ brandImg, brandName, routes }) {
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavColor, sidenavType, openSidenav } = controller;
+  const navigate = useNavigate();
+  const adminToken = localStorage.getItem("adminToken");
   const sidenavTypes = {
     dark: "bg-gradient-to-br from-gray-800 to-gray-900",
     white: "bg-white shadow-sm",
     transparent: "bg-transparent",
   };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/auth/sign-in");
+  };
+
+  // Redirect to sign-in if no token
+  useEffect(() => {
+    if (!adminToken) {
+      navigate("/auth/sign-in");
+    }
+  }, [adminToken, navigate]);
+
+  // Don't render anything if there's no admin token
+  if (!adminToken) {
+    return null;
+  }
+
+  // Filter out hidden routes
+  const visibleRoutes = routes.filter((route) => !route.hidden);
 
   return (
     <aside
@@ -24,9 +45,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
         openSidenav ? "translate-x-0" : "-translate-x-80"
       } fixed inset-0 z-50 my-4 ml-4 h-[calc(100vh-32px)] w-72 rounded-xl transition-transform duration-300 xl:translate-x-0 border border-blue-gray-100`}
     >
-      <div
-        className={`relative`}
-      >
+      <div className="relative">
         <Link to="/" className="py-6 px-8 text-center">
           <Typography
             variant="h6"
@@ -46,8 +65,8 @@ export function Sidenav({ brandImg, brandName, routes }) {
           <XMarkIcon strokeWidth={2.5} className="h-5 w-5 text-white" />
         </IconButton>
       </div>
-      <div className="m-4">
-        {routes.map(({ layout, title, pages }, key) => (
+      <div className="m-4 h-[calc(100%-180px)] overflow-y-auto">
+        {visibleRoutes.map(({ layout, title, pages }, key) => (
           <ul key={key} className="mb-4 flex flex-col gap-1">
             {title && (
               <li className="mx-3.5 mt-4 mb-2">
@@ -91,13 +110,29 @@ export function Sidenav({ brandImg, brandName, routes }) {
           </ul>
         ))}
       </div>
+
+      {/* Fixed Logout Button at the bottom */}
+      <div className="absolute bottom-4 left-0 right-0 px-4">
+        <Button
+          variant="text"
+          color={sidenavType === "dark" ? "white" : "blue-gray"}
+          className="flex items-center gap-4 px-4 capitalize"
+          fullWidth
+          onClick={handleLogout}
+        >
+          <ArrowRightOnRectangleIcon className="h-5 w-5" />
+          <Typography color="inherit" className="font-medium capitalize">
+            Logout
+          </Typography>
+        </Button>
+      </div>
     </aside>
   );
 }
 
 Sidenav.defaultProps = {
   brandImg: "/img/logo-ct.png",
-  brandName: "Material Tailwind React",
+  brandName: "Elite-Fit",
 };
 
 Sidenav.propTypes = {

@@ -1,3 +1,5 @@
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import React, { useState, useEffect } from "react";
 import {
   Card,
@@ -69,6 +71,110 @@ const Products = () => {
 
     fetchProducts();
   }, []);
+
+  // Function to export products to PDF
+  const exportToPDF = async () => {
+    setLoading(true);
+    try {
+      const doc = new jsPDF();
+
+      // Add title
+      doc.setFontSize(20);
+      doc.text("Products Report", 105, 15, { align: "center" });
+
+      // Prepare data for the table
+      const tableData = await Promise.all(
+        products.map(async (product) => {
+          // Convert image to data URL
+          let imgData = "";
+          try {
+            const response = await fetch(
+              `http://localhost:5000/${product.image}`
+            );
+            const blob = await response.blob();
+            imgData = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result);
+              reader.readAsDataURL(blob);
+            });
+          } catch (error) {
+            console.error("Error loading image:", error);
+          }
+
+          return [
+            { content: product.name, styles: { fontStyle: "bold" } },
+            product.description.substring(0, 50) + "...",
+            `$${product.price}`,
+            product.stock,
+            product.status === "active" ? "Active" : "Inactive",
+            { content: "", styles: { cellWidth: 20 } }, // Placeholder for image
+          ];
+        })
+      );
+
+      // Create the table
+      autoTable(doc, {
+        head: [
+          ["Product Name", "Description", "Price", "Stock", "Status", "Image"],
+        ],
+        body: tableData,
+        startY: 25,
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+        columnStyles: {
+          0: { cellWidth: 30 },
+          1: { cellWidth: 60 },
+          2: { cellWidth: 20 },
+          3: { cellWidth: 20 },
+          4: { cellWidth: 20 },
+          5: { cellWidth: 30 },
+        },
+        didDrawCell: async (data) => {
+          // Add images to the last column
+          if (data.column.index === 5 && data.row.index >= 0) {
+            const product = products[data.row.index];
+            if (product.image) {
+              try {
+                const response = await fetch(
+                  `http://localhost:5000/${product.image}`
+                );
+                const blob = await response.blob();
+                const imgData = await new Promise((resolve) => {
+                  const reader = new FileReader();
+                  reader.onloadend = () => resolve(reader.result);
+                  reader.readAsDataURL(blob);
+                });
+
+                const imgProps = doc.getImageProperties(imgData);
+                const width = 20;
+                const height = (imgProps.height * width) / imgProps.width;
+
+                doc.addImage(
+                  imgData,
+                  "JPEG",
+                  data.cell.x + 5,
+                  data.cell.y + 2,
+                  width,
+                  height
+                );
+              } catch (error) {
+                console.error("Error adding image to PDF:", error);
+              }
+            }
+          }
+        },
+      });
+
+      // Save the PDF
+      doc.save("products_report.pdf");
+      toast.success("PDF exported successfully");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast.error("Failed to export PDF");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Handle delete product
   const handleDelete = async (productId) => {
@@ -203,10 +309,21 @@ const Products = () => {
   return (
     <div className="p-4">
       <Card className="mb-8">
-        <CardHeader variant="gradient" color="blue" className="mb-8 p-6">
-          <Typography variant="h6" color="white">
-            Products Management
-          </Typography>
+        <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
+          <div className="flex justify-between items-center">
+            <Typography variant="h6" color="white">
+              Products Management
+            </Typography>
+            <Button
+              variant="gradient"
+              color="white"
+              onClick={exportToPDF}
+              disabled={loading}
+              className="flex items-center gap-2"
+            >
+              {loading ? <Spinner className="h-4 w-4" /> : <>Export to PDF</>}
+            </Button>
+          </div>
         </CardHeader>
         <CardBody className="overflow-x-auto px-0 pt-0 pb-2">
           <table className="w-full min-w-[640px] table-auto">

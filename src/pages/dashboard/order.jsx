@@ -1,3 +1,5 @@
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import React, { useState, useEffect } from "react";
 import {
   Card,
@@ -60,6 +62,61 @@ const OrderPage = () => {
     },
     { value: "cancelled", label: "Cancelled", icon: XCircleIcon, color: "red" },
   ];
+
+  // Function to export orders to PDF
+  const exportToPDF = () => {
+    setLoading(true);
+    try {
+      const doc = new jsPDF();
+
+      // Add title
+      doc.setFontSize(20);
+      doc.text("Orders Report", 105, 15, { align: "center" });
+
+      // Prepare data for the table
+      const tableData = orders.map((order) => {
+        const statusInfo = statusOptions.find(
+          (opt) => opt.value === order.status
+        );
+        const customerName = order.user
+          ? `${order.user.firstName} ${order.user.lastName}`
+          : order.shippingName;
+
+        return [
+          `#${order.id}`,
+          customerName,
+          `$${order.total}`,
+          statusInfo?.label || order.status,
+          new Date(order.createdAt).toLocaleDateString(),
+        ];
+      });
+
+      // Create the table
+      autoTable(doc, {
+        head: [["Order ID", "Customer", "Amount", "Status", "Date"]],
+        body: tableData,
+        startY: 25,
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+        columnStyles: {
+          0: { cellWidth: 20 },
+          1: { cellWidth: 40 },
+          2: { cellWidth: 20 },
+          3: { cellWidth: 30 },
+          4: { cellWidth: 30 },
+        },
+      });
+
+      // Save the PDF
+      doc.save("orders_report.pdf");
+      showNotification("PDF exported successfully", "green");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      showNotification("Failed to export PDF", "red");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchOrders = async () => {
     try {
@@ -178,10 +235,21 @@ const OrderPage = () => {
   return (
     <div className="p-4">
       <Card className="mb-8">
-        <CardHeader variant="gradient" color="blue" className="mb-8 p-6">
-          <Typography variant="h6" color="white">
-            Order Management
-          </Typography>
+        <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
+          <div className="flex justify-between items-center">
+            <Typography variant="h6" color="white">
+              Order Management
+            </Typography>
+            <Button
+              variant="gradient"
+              color="white"
+              onClick={exportToPDF}
+              disabled={loading}
+              className="flex items-center gap-2"
+            >
+              {loading ? <Spinner className="h-4 w-4" /> : <>Export to PDF</>}
+            </Button>
+          </div>
         </CardHeader>
         <CardBody className="overflow-x-auto px-0 pt-0 pb-2">
           <table className="w-full min-w-[640px] table-auto">

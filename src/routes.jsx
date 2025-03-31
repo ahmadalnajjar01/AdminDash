@@ -3,11 +3,13 @@ import {
   TableCellsIcon,
   ServerStackIcon,
 } from "@heroicons/react/24/solid";
-import { Home, Tables } from "@/pages/dashboard";
+import { Home } from "@/pages/dashboard";
 import { SignIn } from "@/pages/auth";
-import User from "./pages/dashboard/user";
+import User1 from "./pages/dashboard/user";
 import Products from "./pages/dashboard/products";
 import Order from "./pages/dashboard/order";
+import Message from "./pages/dashboard/message";
+import { Package, MessageSquare, User } from "lucide-react";
 
 const icon = {
   className: "w-5 h-5 text-inherit",
@@ -24,10 +26,10 @@ export const routes = [
         element: <Home />,
       },
       {
-        icon: <HomeIcon {...icon} />,
+        icon: <User {...icon} />,
         name: "users",
         path: "/users",
-        element: <User />,
+        element: <User1 />,
       },
       {
         icon: <ServerStackIcon {...icon} />,
@@ -36,22 +38,23 @@ export const routes = [
         element: <Products />,
       },
       {
-        icon: <ServerStackIcon {...icon} />,
+        icon: <Package {...icon} />,
         name: "order",
         path: "/order",
         element: <Order />,
       },
       {
-        icon: <TableCellsIcon {...icon} />,
-        name: "tables",
-        path: "/tables",
-        element: <Tables />,
+        icon: <MessageSquare {...icon} />,
+        name: "message",
+        path: "/message",
+        element: <Message />,
       },
     ],
   },
   {
     title: "auth pages",
     layout: "auth",
+    hidden: true,
     pages: [
       {
         icon: <ServerStackIcon {...icon} />,
