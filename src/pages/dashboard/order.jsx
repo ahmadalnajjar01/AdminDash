@@ -235,7 +235,10 @@ const OrderPage = () => {
   return (
     <div className="p-4">
       <Card className="mb-8">
-        <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
+        <CardHeader
+          variant="gradient"
+          className="mb-8 p-6 bg-[#181818]"
+        >
           <div className="flex justify-between items-center">
             <Typography variant="h6" color="white">
               Order Management

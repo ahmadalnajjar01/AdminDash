@@ -29,6 +29,7 @@ import {
   CheckIcon,
   XMarkIcon,
   ArrowUpTrayIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -80,6 +81,7 @@ const Products = () => {
 
       // Add title
       doc.setFontSize(20);
+      doc.setTextColor(24, 24, 24); // #181818
       doc.text("Products Report", 105, 15, { align: "center" });
 
       // Prepare data for the table
@@ -120,7 +122,13 @@ const Products = () => {
         body: tableData,
         startY: 25,
         styles: { fontSize: 9 },
-        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+        headStyles: {
+          fillColor: [24, 24, 24], // #181818
+          textColor: [255, 255, 255], // #FFFFFF
+        },
+        alternateRowStyles: {
+          fillColor: [240, 187, 120, 0.1], // #F0BB78 with opacity
+        },
         columnStyles: {
           0: { cellWidth: 30 },
           1: { cellWidth: 60 },
@@ -289,7 +297,7 @@ const Products = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Spinner className="h-12 w-12" />
+        <Spinner className="h-12 w-12 text-[#F0BB78]" />
       </div>
     );
   }
@@ -308,20 +316,22 @@ const Products = () => {
 
   return (
     <div className="p-4">
-      <Card className="mb-8">
-        <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
+      <Card className="mb-8 bg-white shadow-lg">
+        <CardHeader className="mb-8 p-6 bg-[#181818]">
           <div className="flex justify-between items-center">
-            <Typography variant="h6" color="white">
+            <Typography variant="h6" className="text-white">
               Products Management
             </Typography>
             <Button
-              variant="gradient"
-              color="white"
+              className="bg-[#F0BB78] text-[#181818] hover:bg-[#F0BB78]/90 flex items-center gap-2"
               onClick={exportToPDF}
               disabled={loading}
-              className="flex items-center gap-2"
             >
-              {loading ? <Spinner className="h-4 w-4" /> : <>Export to PDF</>}
+              {loading ? (
+                <Spinner className="h-4 w-4 text-[#181818]" />
+              ) : (
+                "Export to PDF"
+              )}
             </Button>
           </div>
         </CardHeader>
@@ -339,11 +349,11 @@ const Products = () => {
                 ].map((el) => (
                   <th
                     key={el}
-                    className="border-b border-blue-gray-50 py-3 px-5 text-left"
+                    className="border-b border-[#F0BB78]/20 py-3 px-5 text-left"
                   >
                     <Typography
                       variant="small"
-                      className="text-[11px] font-bold uppercase text-blue-gray-400"
+                      className="text-[11px] font-bold uppercase text-[#181818]"
                     >
                       {el}
                     </Typography>
@@ -352,11 +362,14 @@ const Products = () => {
               </tr>
             </thead>
             <tbody>
-              {products.map((product) => {
-                const className = `py-3 px-5 border-b border-blue-gray-50`;
+              {products.map((product, index) => {
+                const className = `py-3 px-5 border-b border-[#F0BB78]/10`;
 
                 return (
-                  <tr key={product.id}>
+                  <tr
+                    key={product.id}
+                    className={index % 2 === 0 ? "bg-[#F0BB78]/5" : ""}
+                  >
                     <td className={className}>
                       <div className="flex items-center gap-3">
                         <Avatar
@@ -364,14 +377,18 @@ const Products = () => {
                           alt={product.name}
                           size="sm"
                           variant="rounded"
+                          className="border border-[#F0BB78]/20"
                         />
                         <div>
-                          <Typography variant="small" className="font-medium">
+                          <Typography
+                            variant="small"
+                            className="font-medium text-[#181818]"
+                          >
                             {product.name}
                           </Typography>
                           <Typography
                             variant="small"
-                            className="text-blue-gray-500"
+                            className="text-[#181818]/60"
                           >
                             ID: #{product.id}
                           </Typography>
@@ -381,7 +398,7 @@ const Products = () => {
                     <td className={className}>
                       <Typography
                         variant="small"
-                        className="font-medium text-blue-gray-600"
+                        className="font-medium text-[#181818]"
                       >
                         {product.description.substring(0, 50)}...
                       </Typography>
@@ -389,7 +406,7 @@ const Products = () => {
                     <td className={className}>
                       <Typography
                         variant="small"
-                        className="font-medium text-blue-gray-600"
+                        className="font-medium text-[#181818]"
                       >
                         ${product.price}
                       </Typography>
@@ -397,7 +414,7 @@ const Products = () => {
                     <td className={className}>
                       <Typography
                         variant="small"
-                        className="font-medium text-blue-gray-600"
+                        className="font-medium text-[#181818]"
                       >
                         {product.stock}
                       </Typography>
@@ -405,37 +422,33 @@ const Products = () => {
                     <td className={className}>
                       {editingProduct === product.id ? (
                         <Switch
-                          color="green"
+                          color="amber"
                           checked={editFormData.status}
                           onChange={handleStatusToggle}
                           label={
                             <div>
-                              <Typography
-                                color="blue-gray"
-                                className="font-medium"
-                              >
+                              <Typography className="font-medium text-[#181818]">
                                 {editFormData.status ? "Active" : "Inactive"}
                               </Typography>
                             </div>
                           }
+                          className="checked:bg-[#F0BB78]"
                         />
                       ) : (
                         <Switch
-                          color="green"
+                          color="amber"
                           checked={product.status === "active"}
                           readOnly
                           label={
                             <div>
-                              <Typography
-                                color="blue-gray"
-                                className="font-medium"
-                              >
+                              <Typography className="font-medium text-[#181818]">
                                 {product.status === "active"
                                   ? "Active"
                                   : "Inactive"}
                               </Typography>
                             </div>
                           }
+                          className="checked:bg-[#F0BB78]"
                         />
                       )}
                     </td>
@@ -444,7 +457,7 @@ const Products = () => {
                         <Tooltip content="View Details">
                           <IconButton
                             variant="text"
-                            color="blue-gray"
+                            className="text-[#181818] hover:bg-[#F0BB78]/10"
                             onClick={() => viewProductDetails(product)}
                           >
                             <EyeIcon className="h-5 w-5" />
@@ -455,7 +468,7 @@ const Products = () => {
                             <Tooltip content="Save">
                               <IconButton
                                 variant="text"
-                                color="green"
+                                className="text-[#F0BB78] hover:bg-[#F0BB78]/10"
                                 onClick={() => handleEditSubmit(product.id)}
                               >
                                 <CheckIcon className="h-5 w-5" />
@@ -464,7 +477,7 @@ const Products = () => {
                             <Tooltip content="Cancel">
                               <IconButton
                                 variant="text"
-                                color="red"
+                                className="text-red-500 hover:bg-red-500/10"
                                 onClick={handleCancelEdit}
                               >
                                 <XMarkIcon className="h-5 w-5" />
@@ -476,7 +489,7 @@ const Products = () => {
                             <Tooltip content="Edit">
                               <IconButton
                                 variant="text"
-                                color="blue-gray"
+                                className="text-[#F0BB78] hover:bg-[#F0BB78]/10"
                                 onClick={() => handleEditClick(product)}
                               >
                                 <PencilIcon className="h-5 w-5" />
@@ -485,7 +498,7 @@ const Products = () => {
                             <Tooltip content="Delete">
                               <IconButton
                                 variant="text"
-                                color="red"
+                                className="text-red-500 hover:bg-red-500/10"
                                 onClick={() => handleDelete(product.id)}
                               >
                                 <TrashIcon className="h-5 w-5" />
@@ -505,8 +518,10 @@ const Products = () => {
 
       {/* Product Details Dialog */}
       <Dialog open={openDialog} handler={() => setOpenDialog(false)} size="lg">
-        <DialogHeader>Product Details #{selectedProduct?.id}</DialogHeader>
-        <DialogBody divider>
+        <DialogHeader className="bg-[#181818] text-white">
+          Product Details #{selectedProduct?.id}
+        </DialogHeader>
+        <DialogBody divider className="bg-white">
           {selectedProduct && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -516,12 +531,13 @@ const Products = () => {
                     alt={selectedProduct.name}
                     size="xxl"
                     variant="rounded"
+                    className="border border-[#F0BB78]/20"
                   />
                 </div>
-                <Typography variant="h6" color="blue-gray" className="mb-2">
+                <Typography variant="h6" className="mb-2 text-[#181818]">
                   {selectedProduct.name}
                 </Typography>
-                <Typography className="mb-4">
+                <Typography className="mb-4 text-[#181818]">
                   {selectedProduct.description}
                 </Typography>
               </div>
@@ -530,42 +546,44 @@ const Products = () => {
                   <div>
                     <Typography
                       variant="small"
-                      color="blue-gray"
-                      className="font-bold"
+                      className="font-bold text-[#181818]"
                     >
                       Price
                     </Typography>
-                    <Typography>${selectedProduct.price}</Typography>
+                    <Typography className="text-[#181818]">
+                      ${selectedProduct.price}
+                    </Typography>
                   </div>
                   <div>
                     <Typography
                       variant="small"
-                      color="blue-gray"
-                      className="font-bold"
+                      className="font-bold text-[#181818]"
                     >
                       Stock
                     </Typography>
-                    <Typography>{selectedProduct.stock}</Typography>
+                    <Typography className="text-[#181818]">
+                      {selectedProduct.stock}
+                    </Typography>
                   </div>
                   <div>
                     <Typography
                       variant="small"
-                      color="blue-gray"
-                      className="font-bold"
+                      className="font-bold text-[#181818]"
                     >
                       Status
                     </Typography>
                     <Switch
-                      color="green"
+                      color="amber"
                       checked={selectedProduct.status === "active"}
                       readOnly
                       label={
-                        <Typography color="blue-gray" className="font-medium">
+                        <Typography className="font-medium text-[#181818]">
                           {selectedProduct.status === "active"
                             ? "Active"
                             : "Inactive"}
                         </Typography>
                       }
+                      className="checked:bg-[#F0BB78]"
                     />
                   </div>
                 </div>
@@ -573,12 +591,11 @@ const Products = () => {
             </div>
           )}
         </DialogBody>
-        <DialogFooter>
+        <DialogFooter className="bg-white">
           <Button
             variant="text"
-            color="red"
+            className="text-red-500 hover:bg-red-500/10 mr-1"
             onClick={() => setOpenDialog(false)}
-            className="mr-1"
           >
             Close
           </Button>
@@ -588,12 +605,14 @@ const Products = () => {
       {/* Edit Form Dialog */}
       {editingProduct && (
         <Dialog open={!!editingProduct} handler={handleCancelEdit} size="xl">
-          <DialogHeader>Edit Product #{editingProduct}</DialogHeader>
-          <DialogBody divider>
+          <DialogHeader className="bg-[#181818] text-white">
+            Edit Product #{editingProduct}
+          </DialogHeader>
+          <DialogBody divider className="bg-white">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <div className="mb-4">
-                  <Typography variant="small" className="mb-2">
+                  <Typography variant="small" className="mb-2 text-[#181818]">
                     Product Image
                   </Typography>
                   <div className="flex items-center gap-4">
@@ -606,12 +625,12 @@ const Products = () => {
                       alt="Product"
                       size="xxl"
                       variant="rounded"
+                      className="border border-[#F0BB78]/20"
                     />
                     <label className="cursor-pointer">
                       <Button
                         variant="outlined"
-                        color="blue-gray"
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2 text-[#181818] border-[#F0BB78] hover:bg-[#F0BB78]/10"
                       >
                         <ArrowUpTrayIcon className="h-4 w-4" />
                         Upload New Image
@@ -633,12 +652,20 @@ const Products = () => {
                     name="name"
                     value={editFormData.name}
                     onChange={handleEditFormChange}
+                    className="!border-[#F0BB78]/50 focus:!border-[#F0BB78]"
+                    labelProps={{
+                      className: "text-[#181818]",
+                    }}
                   />
                   <Textarea
                     label="Description"
                     name="description"
                     value={editFormData.description}
                     onChange={handleEditFormChange}
+                    className="!border-[#F0BB78]/50 focus:!border-[#F0BB78]"
+                    labelProps={{
+                      className: "text-[#181818]",
+                    }}
                   />
                   <div className="grid grid-cols-2 gap-4">
                     <Input
@@ -647,6 +674,10 @@ const Products = () => {
                       name="price"
                       value={editFormData.price}
                       onChange={handleEditFormChange}
+                      className="!border-[#F0BB78]/50 focus:!border-[#F0BB78]"
+                      labelProps={{
+                        className: "text-[#181818]",
+                      }}
                     />
                     <Input
                       type="number"
@@ -654,34 +685,37 @@ const Products = () => {
                       name="stock"
                       value={editFormData.stock}
                       onChange={handleEditFormChange}
+                      className="!border-[#F0BB78]/50 focus:!border-[#F0BB78]"
+                      labelProps={{
+                        className: "text-[#181818]",
+                      }}
                     />
                   </div>
                   <Switch
-                    color="green"
+                    color="amber"
                     checked={editFormData.status}
                     onChange={handleStatusToggle}
                     label={
-                      <Typography color="blue-gray" className="font-medium">
+                      <Typography className="font-medium text-[#181818]">
                         {editFormData.status ? "Active" : "Inactive"}
                       </Typography>
                     }
+                    className="checked:bg-[#F0BB78]"
                   />
                 </div>
               </div>
             </div>
           </DialogBody>
-          <DialogFooter>
+          <DialogFooter className="bg-white">
             <Button
               variant="text"
-              color="red"
+              className="text-red-500 hover:bg-red-500/10 mr-1"
               onClick={handleCancelEdit}
-              className="mr-1"
             >
               Cancel
             </Button>
             <Button
-              variant="gradient"
-              color="green"
+              className="bg-[#F0BB78] text-[#181818] hover:bg-[#F0BB78]/90"
               onClick={() => handleEditSubmit(editingProduct)}
             >
               Save Changes
