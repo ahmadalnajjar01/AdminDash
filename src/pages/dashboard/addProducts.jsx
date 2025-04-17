@@ -17,9 +17,9 @@ const AddProducts = () => {
   });
 
   const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState(""); // For styling success/error messages
-  const [categories, setCategories] = useState([]); // State to store categories
-  const [occasions, setOccasions] = useState([]); // State to store occasions
+  const [messageType, setMessageType] = useState("");
+  const [categories, setCategories] = useState([]);
+  const [occasions, setOccasions] = useState([]);
 
   // Fetch categories and occasions on component mount
   useEffect(() => {
@@ -39,7 +39,7 @@ const AddProducts = () => {
         const response = await axios.get(
           "http://localhost:5000/api/occasion/get-all"
         );
-        setOccasions(response.data.data); // Access the `data` array from the response
+        setOccasions(response.data.data);
       } catch (error) {
         console.error("Error fetching occasions:", error);
       }
@@ -119,26 +119,33 @@ const AddProducts = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Add New Product</h2>
+    <div className="max-w-4xl mx-auto p-8 bg-white rounded-xl shadow-lg border border-gray-100">
+      <h2 className="text-3xl font-bold text-gray-900 mb-8 relative">
+        <span
+          className="inline-block pb-2 pr-4 border-b-4 border-amber-400"
+          style={{ borderColor: "#F0BB78" }}
+        >
+          Add New Product
+        </span>
+      </h2>
 
       {message && (
         <div
-          className={`mb-4 p-3 rounded ${
+          className={`mb-6 p-4 rounded-lg flex items-center ${
             messageType === "success"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
+              ? "bg-green-50 border-l-4 border-green-500 text-green-700"
+              : "bg-red-50 border-l-4 border-red-500 text-red-700"
           }`}
         >
-          {message}
+          <span className="font-medium">{message}</span>
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Product Name */}
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium mb-2 text-gray-900">
               Product Name
             </label>
             <input
@@ -147,13 +154,14 @@ const AddProducts = () => {
               value={formData.name}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all"
+              style={{ focusRing: "#F0BB78" }}
             />
           </div>
 
           {/* Description */}
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium mb-2 text-gray-900">
               Description
             </label>
             <textarea
@@ -161,17 +169,18 @@ const AddProducts = () => {
               rows="4"
               value={formData.description}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all"
+              style={{ focusRing: "#F0BB78" }}
             />
           </div>
 
           {/* Price */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium mb-2 text-gray-900">
               Price
             </label>
             <div className="relative">
-              <div className="absolute left-0 inset-y-0 flex items-center pl-3 pointer-events-none">
+              <div className="absolute left-0 inset-y-0 flex items-center pl-4 pointer-events-none">
                 <span className="text-gray-500">$</span>
               </div>
               <input
@@ -180,14 +189,15 @@ const AddProducts = () => {
                 value={formData.price}
                 onChange={handleInputChange}
                 required
-                className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all"
+                style={{ focusRing: "#F0BB78" }}
               />
             </div>
           </div>
 
           {/* Stock */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium mb-2 text-gray-900">
               Stock Quantity
             </label>
             <input
@@ -196,13 +206,14 @@ const AddProducts = () => {
               value={formData.stock}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all"
+              style={{ focusRing: "#F0BB78" }}
             />
           </div>
 
           {/* Category ID */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium mb-2 text-gray-900">
               Category
             </label>
             <select
@@ -210,7 +221,16 @@ const AddProducts = () => {
               value={formData.categoryId}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all appearance-none bg-white"
+              style={{
+                focusRing: "#F0BB78",
+                backgroundImage:
+                  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23F0BB78'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E\")",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right 1rem center",
+                backgroundSize: "1.5em 1.5em",
+                paddingRight: "3rem",
+              }}
             >
               <option value="">Select a category</option>
               {categories.map((category) => (
@@ -223,14 +243,23 @@ const AddProducts = () => {
 
           {/* Occasion ID */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium mb-2 text-gray-900">
               Occasion
             </label>
             <select
               name="occasionId"
               value={formData.occasionId}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all appearance-none bg-white"
+              style={{
+                focusRing: "#F0BB78",
+                backgroundImage:
+                  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23F0BB78'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E\")",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right 1rem center",
+                backgroundSize: "1.5em 1.5em",
+                paddingRight: "3rem",
+              }}
             >
               <option value="">Select an occasion</option>
               {occasions.map((occasion) => (
@@ -241,62 +270,115 @@ const AddProducts = () => {
             </select>
           </div>
 
-          {/* Status */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Status
-            </label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value={true}>Active</option>
-              <option value={false}>Inactive</option>
-            </select>
-          </div>
+          {/* Status, New Arrival, and On Sale in one row */}
+          <div className="col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Status */}
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-900">
+                Status
+              </label>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all appearance-none bg-white"
+                style={{
+                  focusRing: "#F0BB78",
+                  backgroundImage:
+                    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23F0BB78'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E\")",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right 1rem center",
+                  backgroundSize: "1.5em 1.5em",
+                  paddingRight: "3rem",
+                }}
+              >
+                <option value={true}>Active</option>
+                <option value={false}>Inactive</option>
+              </select>
+            </div>
 
-          {/* New Arrival */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Is New Arrival
-            </label>
-            <select
-              name="isNewArrival"
-              value={formData.isNewArrival}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value={true}>Yes</option>
-              <option value={false}>No</option>
-            </select>
-          </div>
+            {/* New Arrival */}
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-900">
+                Is New Arrival
+              </label>
+              <select
+                name="isNewArrival"
+                value={formData.isNewArrival}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all appearance-none bg-white"
+                style={{
+                  focusRing: "#F0BB78",
+                  backgroundImage:
+                    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23F0BB78'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E\")",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right 1rem center",
+                  backgroundSize: "1.5em 1.5em",
+                  paddingRight: "3rem",
+                }}
+              >
+                <option value={true}>Yes</option>
+                <option value={false}>No</option>
+              </select>
+            </div>
 
-          {/* On Sale */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              On Sale
-            </label>
-            <select
-              name="onSale"
-              value={formData.onSale}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value={true}>Yes</option>
-              <option value={false}>No</option>
-            </select>
+            {/* On Sale */}
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-900">
+                On Sale
+              </label>
+              <select
+                name="onSale"
+                value={formData.onSale}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all appearance-none bg-white"
+                style={{
+                  focusRing: "#F0BB78",
+                  backgroundImage:
+                    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23F0BB78'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E\")",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right 1rem center",
+                  backgroundSize: "1.5em 1.5em",
+                  paddingRight: "3rem",
+                }}
+              >
+                <option value={true}>Yes</option>
+                <option value={false}>No</option>
+              </select>
+            </div>
           </div>
 
           {/* Product Image */}
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium mb-2 text-gray-900">
               Product Image
             </label>
-            <div className="mt-1 flex items-center">
-              <label className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
-                <span className="mr-2">Upload Image</span>
+            <div
+              className="mt-1 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-amber-400 transition-colors"
+              style={{ hoverBorderColor: "#F0BB78" }}
+            >
+              <label className="flex flex-col items-center justify-center cursor-pointer">
+                <div className="flex flex-col items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-12 w-12 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <p className="mt-2 text-sm text-gray-500">
+                    {formData.image
+                      ? formData.image.name
+                      : "Click to upload image or drag and drop"}
+                  </p>
+                </div>
                 <input
                   type="file"
                   name="image"
@@ -306,19 +388,19 @@ const AddProducts = () => {
                 />
               </label>
             </div>
-            {formData.image && (
-              <p className="mt-2 text-sm text-gray-500">
-                Selected file: {formData.image.name}
-              </p>
-            )}
           </div>
         </div>
 
         {/* Submit Button */}
-        <div className="flex justify-end">
+        <div className="flex justify-end mt-8">
           <button
             type="submit"
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+            className="px-8 py-3 rounded-lg text-white font-medium shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all"
+            style={{
+              backgroundColor: "#181818",
+              color: "#ffffff",
+              focusRing: "#F0BB78",
+            }}
           >
             Add Product
           </button>

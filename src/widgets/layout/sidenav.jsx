@@ -10,14 +10,9 @@ import { useEffect } from "react";
 
 export function Sidenav({ brandImg, brandName, routes }) {
   const [controller, dispatch] = useMaterialTailwindController();
-  const { sidenavColor, sidenavType, openSidenav } = controller;
+  const { sidenavColor, openSidenav } = controller;
   const navigate = useNavigate();
   const adminToken = localStorage.getItem("adminToken");
-  const sidenavTypes = {
-    dark: "bg-gradient-to-br from-gray-800 to-gray-900",
-    white: "bg-white shadow-sm",
-    transparent: "bg-transparent",
-  };
 
   const handleLogout = () => {
     localStorage.clear();
@@ -41,16 +36,13 @@ export function Sidenav({ brandImg, brandName, routes }) {
 
   return (
     <aside
-      className={`${sidenavTypes[sidenavType]} ${
+      className={`bg-[#181818] ${
         openSidenav ? "translate-x-0" : "-translate-x-80"
-      } fixed inset-0 z-50 my-4 ml-4 h-[calc(100vh-32px)] w-72 rounded-xl transition-transform duration-300 xl:translate-x-0 border border-blue-gray-100`}
+      } fixed inset-0 z-50 my-4 ml-4 h-[calc(100vh-32px)] w-72 rounded-xl transition-transform duration-300 xl:translate-x-0 border border-[#F0BB78]/20`}
     >
       <div className="relative">
         <Link to="/" className="py-6 px-8 text-center">
-          <Typography
-            variant="h6"
-            color={sidenavType === "dark" ? "white" : "blue-gray"}
-          >
+          <Typography variant="h6" className="text-white">
             {brandName}
           </Typography>
         </Link>
@@ -72,8 +64,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
               <li className="mx-3.5 mt-4 mb-2">
                 <Typography
                   variant="small"
-                  color={sidenavType === "dark" ? "white" : "blue-gray"}
-                  className="font-black uppercase opacity-75"
+                  className="font-black uppercase text-[#F0BB78] opacity-90"
                 >
                   {title}
                 </Typography>
@@ -85,20 +76,24 @@ export function Sidenav({ brandImg, brandName, routes }) {
                   {({ isActive }) => (
                     <Button
                       variant={isActive ? "gradient" : "text"}
-                      color={
+                      className={`flex items-center gap-4 px-4 capitalize ${
                         isActive
-                          ? sidenavColor
-                          : sidenavType === "dark"
-                          ? "white"
-                          : "blue-gray"
-                      }
-                      className="flex items-center gap-4 px-4 capitalize"
+                          ? "bg-[#F0BB78] text-[#181818]"
+                          : "text-white hover:bg-[#F0BB78]/10"
+                      }`}
                       fullWidth
                     >
-                      {icon}
+                      <div
+                        className={
+                          isActive ? "text-[#181818]" : "text-[#F0BB78]"
+                        }
+                      >
+                        {icon}
+                      </div>
                       <Typography
-                        color="inherit"
-                        className="font-medium capitalize"
+                        className={`font-medium capitalize ${
+                          isActive ? "text-[#181818]" : "text-white"
+                        }`}
                       >
                         {name}
                       </Typography>
@@ -115,13 +110,12 @@ export function Sidenav({ brandImg, brandName, routes }) {
       <div className="absolute bottom-4 left-0 right-0 px-4">
         <Button
           variant="text"
-          color={sidenavType === "dark" ? "white" : "blue-gray"}
-          className="flex items-center gap-4 px-4 capitalize"
+          className="flex items-center gap-4 px-4 capitalize text-white hover:bg-[#F0BB78]/10"
           fullWidth
           onClick={handleLogout}
         >
-          <ArrowRightOnRectangleIcon className="h-5 w-5" />
-          <Typography color="inherit" className="font-medium capitalize">
+          <ArrowRightOnRectangleIcon className="h-5 w-5 text-[#F0BB78]" />
+          <Typography className="font-medium capitalize text-white">
             Logout
           </Typography>
         </Button>

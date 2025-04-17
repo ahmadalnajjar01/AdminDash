@@ -44,6 +44,7 @@ export function Tables() {
     const doc = new jsPDF();
 
     // Add title
+    doc.setTextColor(24, 24, 24); // #181818
     doc.text("Customers List", 14, 15);
 
     // Prepare data for the table
@@ -66,12 +67,12 @@ export function Tables() {
         halign: "left",
       },
       headStyles: {
-        fillColor: [128, 128, 128],
-        textColor: [255, 255, 255],
+        fillColor: [24, 24, 24], // #181818
+        textColor: [255, 255, 255], // #FFFFFF
         fontStyle: "bold",
       },
       alternateRowStyles: {
-        fillColor: [245, 245, 245],
+        fillColor: [240, 187, 120, 0.1], // #F0BB78 with opacity
       },
     });
 
@@ -80,29 +81,24 @@ export function Tables() {
   };
 
   if (loading) {
-    return <Typography>Loading...</Typography>;
+    return <Typography className="text-[#181818]">Loading...</Typography>;
   }
 
   if (error) {
-    return <Typography color="red">{error}</Typography>;
+    return <Typography className="text-red-500">{error}</Typography>;
   }
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
-      <Card>
-        <CardHeader
-          variant="gradient"
-          color="gray"
-          className="mb-8 p-6 flex justify-between items-center"
-        >
-          <Typography variant="h6" color="white">
+      <Card className="bg-white shadow-lg">
+        <CardHeader className="mb-8 p-6 flex justify-between items-center bg-[#181818]">
+          <Typography variant="h6" className="text-white">
             Customers Table
           </Typography>
           <Button
-            color="white"
+            className="bg-[#F0BB78] text-[#181818] flex items-center gap-2 hover:bg-[#F0BB78]/90"
             size="sm"
             onClick={exportToPDF}
-            className="flex items-center gap-2"
           >
             Export to PDF
           </Button>
@@ -114,11 +110,11 @@ export function Tables() {
                 {["Name", "Email", "Role", "Created At", ""].map((el) => (
                   <th
                     key={el}
-                    className="border-b border-blue-gray-50 py-3 px-5 text-left"
+                    className="border-b border-[#F0BB78]/20 py-3 px-5 text-left"
                   >
                     <Typography
                       variant="small"
-                      className="text-[11px] font-bold uppercase text-blue-gray-400"
+                      className="text-[11px] font-bold uppercase text-[#181818]"
                     >
                       {el}
                     </Typography>
@@ -132,42 +128,44 @@ export function Tables() {
                   const className = `py-3 px-5 ${
                     key === customers.length - 1
                       ? ""
-                      : "border-b border-blue-gray-50"
+                      : "border-b border-[#F0BB78]/10"
                   }`;
 
                   return (
-                    <tr key={id}>
+                    <tr
+                      key={id}
+                      className={key % 2 === 0 ? "bg-[#F0BB78]/5" : ""}
+                    >
                       <td className={className}>
                         <div className="flex items-center gap-4">
                           <div>
                             <Typography
                               variant="small"
-                              color="blue-gray"
-                              className="font-semibold"
+                              className="font-semibold text-[#181818]"
                             >
                               {`${firstName} ${lastName}`}
                             </Typography>
-                            <Typography className="text-xs font-normal text-blue-gray-500">
+                            <Typography className="text-xs font-normal text-[#181818]/70">
                               {email}
                             </Typography>
                           </div>
                         </div>
                       </td>
                       <td className={className}>
-                        <Typography className="text-xs font-semibold text-blue-gray-600">
+                        <Typography className="text-xs font-semibold text-[#181818]">
                           {email}
                         </Typography>
                       </td>
                       <td className={className}>
                         <Chip
                           variant="gradient"
-                          color={role === "customer" ? "green" : "blue-gray"}
+                          color={role === "customer" ? "amber" : "gray"}
                           value={role}
-                          className="py-0.5 px-2 text-[11px] font-medium w-fit"
+                          className="py-0.5 px-2 text-[11px] font-medium w-fit bg-[#F0BB78] text-[#181818]"
                         />
                       </td>
                       <td className={className}>
-                        <Typography className="text-xs font-semibold text-blue-gray-600">
+                        <Typography className="text-xs font-semibold text-[#181818]">
                           {new Date(createdAt).toLocaleDateString()}
                         </Typography>
                       </td>

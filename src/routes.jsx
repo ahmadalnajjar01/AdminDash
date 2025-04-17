@@ -4,7 +4,7 @@ import {
   ServerStackIcon,
 } from "@heroicons/react/24/solid";
 import { Home } from "@/pages/dashboard";
-import { SignIn } from "@/pages/auth";
+import SignIn from "@/pages/auth/sign-in"; // Corrected import for default export
 import User1 from "./pages/dashboard/user";
 import Products from "./pages/dashboard/products";
 import Order from "./pages/dashboard/order";
@@ -67,7 +67,7 @@ export const routes = [
         icon: <ServerStackIcon {...icon} />,
         name: "sign in",
         path: "/sign-in",
-        element: <SignIn />,
+        element: <SignIn />, // Correct usage for default export
       },
     ],
   },
