@@ -106,9 +106,9 @@ const Products = () => {
           return [
             { content: product.name, styles: { fontStyle: "bold" } },
             product.description.substring(0, 50) + "...",
-            `$${product.price}`,
+            `${product.price}JD`,
             product.stock,
-            product.status === "active" ? "Active" : "Inactive",
+            product.status,
             { content: "", styles: { cellWidth: 20 } }, // Placeholder for image
           ];
         })
@@ -408,7 +408,7 @@ const Products = () => {
                         variant="small"
                         className="font-medium text-[#181818]"
                       >
-                        ${product.price}
+                        {product.price} JD
                       </Typography>
                     </td>
                     <td className={className}>
@@ -437,7 +437,7 @@ const Products = () => {
                       ) : (
                         <Switch
                           color="amber"
-                          checked={product.status === "active"}
+                          checked={product.status}
                           readOnly
                           label={
                             <div>
@@ -551,7 +551,7 @@ const Products = () => {
                       Price
                     </Typography>
                     <Typography className="text-[#181818]">
-                      ${selectedProduct.price}
+                      {selectedProduct.price} JD
                     </Typography>
                   </div>
                   <div>
@@ -574,7 +574,7 @@ const Products = () => {
                     </Typography>
                     <Switch
                       color="amber"
-                      checked={selectedProduct.status === "active"}
+                      checked={selectedProduct.status}
                       readOnly
                       label={
                         <Typography className="font-medium text-[#181818]">
@@ -628,13 +628,13 @@ const Products = () => {
                       className="border border-[#F0BB78]/20"
                     />
                     <label className="cursor-pointer">
-                      <Button
+                      {/* <Button
                         variant="outlined"
                         className="flex items-center gap-2 text-[#181818] border-[#F0BB78] hover:bg-[#F0BB78]/10"
                       >
                         <ArrowUpTrayIcon className="h-4 w-4" />
                         Upload New Image
-                      </Button>
+                      </Button> */}
                       <input
                         type="file"
                         onChange={handleImageChange}

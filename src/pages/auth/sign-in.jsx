@@ -48,7 +48,7 @@ const SignIn = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-[#181818] to-[#252525] flex items-center justify-center">
+    <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="max-w-6xl mx-auto bg-[#181818] rounded-xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
         {/* Left Section - Visuals */}
         <div className="w-full md:w-1/2 bg-gradient-to-r from-[#252525] to-[#181818] p-10 text-white flex flex-col justify-center relative overflow-hidden">

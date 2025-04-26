@@ -39,6 +39,8 @@ const OrderPage = () => {
   const [openStatusDialog, setOpenStatusDialog] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [currentEditingOrder, setCurrentEditingOrder] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
   const [notification, setNotification] = useState({
     open: false,
     message: "",
@@ -141,18 +143,21 @@ const OrderPage = () => {
     }
   };
 
-  const updateOrderStatus = async (orderId, newStatus) => {
+  const updateOrderStatus = async () => {
+    if (!selectedStatus || !currentEditingOrder) return;
+
     try {
+      setStatusUpdateLoading(true);
       const token = localStorage.getItem("adminToken");
       const response = await fetch(
-        `http://localhost:5000/api/orders/${orderId}/status`,
+        `http://localhost:5000/api/orders/${currentEditingOrder.id}/status`,
         {
           method: "PUT",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ status: newStatus }),
+          body: JSON.stringify({ status: selectedStatus }),
         }
       );
 
@@ -162,15 +167,24 @@ const OrderPage = () => {
 
       setOrders(
         orders.map((order) =>
-          order.id === orderId ? { ...order, status: newStatus } : order
+          order.id === currentEditingOrder.id
+            ? { ...order, status: selectedStatus }
+            : order
         )
       );
 
       showNotification("Order status updated successfully!", "green");
       setOpenStatusDialog(false);
+      setSelectedStatus(null);
     } catch (err) {
       showNotification(err.message, "red");
+    } finally {
+      setStatusUpdateLoading(false);
     }
+  };
+
+  const handleStatusSelect = (status) => {
+    setSelectedStatus(status);
   };
 
   const viewOrderDetails = (order) => {
@@ -180,6 +194,7 @@ const OrderPage = () => {
 
   const openStatusPopup = (order) => {
     setCurrentEditingOrder(order);
+    setSelectedStatus(null); // Reset selected status
     setOpenStatusDialog(true);
   };
 
@@ -235,10 +250,7 @@ const OrderPage = () => {
   return (
     <div className="p-4">
       <Card className="mb-8">
-        <CardHeader
-          variant="gradient"
-          className="mb-8 p-6 bg-[#181818]"
-        >
+        <CardHeader variant="gradient" className="mb-8 p-6 bg-[#181818]">
           <div className="flex justify-between items-center">
             <Typography variant="h6" color="white">
               Order Management
@@ -493,14 +505,16 @@ const OrderPage = () => {
             {statusOptions.map(({ value, label, icon: Icon, color }) => (
               <ListItem
                 key={value}
-                onClick={() => updateOrderStatus(currentEditingOrder.id, value)}
-                className="hover:bg-blue-gray-50"
+                onClick={() => handleStatusSelect(value)}
+                className={`hover:bg-blue-gray-50 ${
+                  selectedStatus === value ? "bg-blue-gray-50" : ""
+                }`}
               >
                 <ListItemPrefix>
                   <Icon className={`h-5 w-5 text-${color}-500`} />
                 </ListItemPrefix>
                 {label}
-                {currentEditingOrder?.status === value && (
+                {selectedStatus === value && (
                   <span className="ml-auto">
                     <CheckIcon className="h-5 w-5 text-green-500" />
                   </span>
@@ -509,14 +523,28 @@ const OrderPage = () => {
             ))}
           </List>
         </DialogBody>
-        <DialogFooter>
+        <DialogFooter className="space-x-2">
           <Button
             variant="text"
             color="red"
             onClick={() => setOpenStatusDialog(false)}
-            className="mr-1"
           >
             Cancel
+          </Button>
+          <Button
+            variant="gradient"
+            color="green"
+            onClick={updateOrderStatus}
+            disabled={!selectedStatus || statusUpdateLoading}
+          >
+            {statusUpdateLoading ? (
+              <div className="flex items-center gap-2">
+                <Spinner className="h-4 w-4" />
+                <span>Saving...</span>
+              </div>
+            ) : (
+              "Save"
+            )}
           </Button>
         </DialogFooter>
       </Dialog>

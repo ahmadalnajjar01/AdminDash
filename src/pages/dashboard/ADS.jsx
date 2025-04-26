@@ -25,7 +25,7 @@ const ADS = () => {
   const [currentAd, setCurrentAd] = useState({
     id: "",
     description: "",
-    status: "active",
+    status: true,
   });
 
   // Fetch all ads
@@ -43,7 +43,7 @@ const ADS = () => {
     }
   };
 
-  // Update ad
+  // Update ad description
   const updateAd = async () => {
     try {
       const response = await fetch(
@@ -51,7 +51,10 @@ const ADS = () => {
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ description: currentAd.description }),
+          body: JSON.stringify({
+            description: currentAd.description,
+            status: currentAd.status, // Keep status while updating the description
+          }),
         }
       );
 
@@ -72,6 +75,42 @@ const ADS = () => {
   // Handle input change for edit
   const handleInputChange = (e) => {
     setCurrentAd({ ...currentAd, description: e.target.value });
+  };
+
+  // Toggle the ad status between active and inactive
+  const toggleStatus = async (ad) => {
+    try {
+      // Optimistically update UI
+      const updatedAds = ads.map((item) => {
+        if (item.id === ad.id) {
+          return { ...item, status: !item.status };
+        }
+        return item;
+      });
+      setAds(updatedAds);
+
+      // Send request to update status on the server
+      const response = await fetch(
+        `http://localhost:5000/api/ads/status/${ad.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            status: !ad.status, // Toggle the status
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to toggle status");
+        // Revert optimistic update on error
+        fetchAds();
+      }
+    } catch (err) {
+      setError(err.message);
+      // Revert optimistic update on error
+      fetchAds();
+    }
   };
 
   useEffect(() => {
@@ -210,21 +249,34 @@ const ADS = () => {
                       <td className={classes}>
                         <Chip
                           variant="ghost"
-                          color={ad.status === "active" ? "green" : "blue-gray"}
-                          value={ad.status === "active" ? "Active" : "Inactive"}
+                          color={ad.status ? "green" : "blue-gray"}
+                          value={ad.status ? "Active" : "Inactive"}
                           className="w-min capitalize"
                         />
                       </td>
                       <td className={classes}>
-                        <Tooltip content="Edit Ad">
-                          <IconButton
-                            variant="text"
-                            color="blue"
-                            onClick={() => handleEditClick(ad)}
+                        <div className="flex items-center gap-2">
+                          <Tooltip content="Edit Ad">
+                            <IconButton
+                              variant="text"
+                              color="blue"
+                              onClick={() => handleEditClick(ad)}
+                            >
+                              <PencilIcon className="h-4 w-4" />
+                            </IconButton>
+                          </Tooltip>
+                          <Button
+                            size="sm"
+                            style={{
+                              backgroundColor: ad.status
+                                ? "#F0BB78"
+                                : "#3B82F6",
+                            }}
+                            onClick={() => toggleStatus(ad)}
                           >
-                            <PencilIcon className="h-4 w-4" />
-                          </IconButton>
-                        </Tooltip>
+                            {ad.status ? "Deactivate" : "Activate"}
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );
